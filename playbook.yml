@@ -1,0 +1,188 @@
+#################################################
+# DO Community Playbooks: Initial Server Setup
+#################################################
+---
+- hosts: all
+  become: yes
+  vars_files:
+    - vars/default.yml
+
+  # Pytest-anki requirement
+  environment:
+      PYTHONPATH: "${PYTHONPATH}:${HOME}/anki/latest"
+      ANKIDEV: 1
+      SHELLFLAGS: -x
+      LC_ALL: "en_US.UTF-8"
+      LC_CTYPE: "en_US.UTF-8"
+      # This stuff may not be necessary.  it seems installing the *correct venv version* works:  sudo apt-get install python3.6-venv
+      # See https://stackoverflow.com/questions/39539110/pyvenv-not-working-because-ensurepip-is-not-available
+
+  tasks:
+    - name: Reconfigure locales
+      shell:
+        cmd: dpkg-reconfigure locales -f noninteractive
+
+    - name: Display all variables/facts
+      debug:
+        var: hostvars["localhost"]
+
+    - name: Install Prerequisites
+      apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
+
+  # Sudo Group Setup
+  #   - name: Make sure we have a 'wheel' group
+  #     group:
+  #       name: wheel
+  #       state: present
+
+  #   - name: Allow 'wheel' group to have passwordless sudo
+  #     lineinfile:
+  #       path: /etc/sudoers
+  #       state: present
+  #       regexp: '^%wheel'
+  #       line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+  #       validate: '/usr/sbin/visudo -cf %s'
+
+  # # User + Key Setup
+  #   - name: Create a new regular user with sudo privileges
+  #     user:
+  #       name: "{{ create_user }}"
+  #       state: present
+  #       groups: wheel
+  #       append: true
+  #       create_home: true
+  #       shell: /bin/bash
+
+  #   - name: Set authorized key for remote user
+  #     authorized_key:
+  #       user: "{{ create_user }}"
+  #       state: present
+  #       key: "{{ copy_local_key }}"
+
+  #   - name: Disable password authentication for root
+  #     lineinfile:
+  #       path: /etc/ssh/sshd_config
+  #       state: present
+  #       regexp: '^#?PermitRootLogin'
+  #       line: 'PermitRootLogin prohibit-password'
+
+    - name: Update apt
+      apt: update_cache=yes
+
+    - name: Install required system packages
+      apt: name={{ sys_packages }} state=latest
+
+  # UFW Setup
+    - name: UFW - Allow SSH connections
+      ufw:
+        rule: allow
+        name: OpenSSH
+
+  #   - name: UFW - Deny all other incoming traffic by default
+  #     ufw:
+  #       state: enabled
+  #       policy: deny
+  #       direction: incoming
+
+###################################################
+# Begin Modifications to Digital Ocean's template #
+###################################################
+
+# TODO: Sync up the order of these things with GH checks
+    - name: Install Anki dependencies
+      apt: name={{ anki_dependencies }} state=latest
+
+    - name: Install python3 dev dependencies
+      apt: name={{ python3_dev }} state=latest
+
+    - name: Install Desktop
+      apt: 
+        name: lubuntu-desktop
+        install-recommends: no
+
+    - name: Install Rust
+      shell:
+        cmd: "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+      args:
+        creates: ~/.cargo/bin/rustup
+      become: yes
+      become_user: vagrant
+
+    - name: Update Rust
+      become: yes
+      become_user: vagrant
+      shell: "~/.cargo/bin/rustup update"
+
+    - name: Cargo install ripgrep
+      become: yes
+      become_user: vagrant
+      shell: "~/.cargo/bin/cargo install ripgrep"
+
+    # - name: Get packaged Anki
+    #   unarchive:
+    #     src: https://github.com/ankitects/anki/releases/download/2.1.26/anki-2.1.26-linux-amd64.tar.bz2
+    #     dest: /root
+    #     remote_src: yes
+    #     creates: /root/anki-2.1.26-linux-amd64
+
+    # - name: Install Anki
+    #   shell:
+    #     cmd: make install
+    #     chdir: /root/anki-2.1.26-linux-amd64
+
+    # - name: Get ripgrep
+    #   get_url:
+    #     url: https://github.com/BurntSushi/ripgrep/releases/download/11.0.2/ripgrep_11.0.2_amd64.deb
+    #     dest: /root/ripgrep_11.0.2_amd64.deb
+
+    # - name: Install ripgrep
+    #   apt: deb="/root/ripgrep_11.0.2_amd64.deb"
+
+    - name: Install protoc
+      unarchive:
+        src: https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
+        dest: /usr/local/
+        remote_src: yes
+
+    - name: Configure Python 3
+      shell: |
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
+        update-alternatives --set python3 /usr/bin/python3.7
+
+    - name: Get Anki Source Code
+      git:
+        repo: 'https://github.com/ankitects/anki'
+        dest: /anki/latest
+        version: 2.1.26
+
+    - name: Touch
+      file:
+        path: /anki/latest/build
+        state: touch
+
+    - name: Make clean
+      make:
+        chdir: /anki/latest
+        target: clean
+
+    - name: Clean up pyenv
+      file:
+        path: /anki/latest/pyenv
+        state: absent
+
+      # TODO: Run `make check` as well
+    - name: Build Anki from source
+      make:
+        chdir: /anki/latest
+        target: build
+
+    - name: Build Anki from source
+      make:
+        chdir: /anki/latest
+        target: develop
+
+    - name: Run Anki
+      become: yes
+      become_user: vagrant
+      shell: . /anki/latest/run
