@@ -1,6 +1,6 @@
 ---
 create_user: aas
 copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
-sys_packages: ["curl", "vim", "git", "ufw", "unzip", "virtualbox-guest-additions-iso", "virtualbox-guest-utils"]
+sys_packages: ["curl", "vim", "git", "ufw", "unzip"]
 anki_dependencies: ["portaudio19-dev", "mpv", "lame", "npm", "rsync", "gcc", "gettext", "python-pyaudio", "python3-pyaudio", "python3-pyqt5", "python3-pyqt5.qtwebengine", "python3-pyqt5.qtwebkit", "pyqt5-dev-tools"]
 python3_dev: ["python3.7", "python3.7-dev", "python3.7-venv", "python3-pip", "python3.7-distutils", "python3-apt"]
