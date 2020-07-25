@@ -30,41 +30,41 @@
       apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
 
   # Sudo Group Setup
-  #   - name: Make sure we have a 'wheel' group
-  #     group:
-  #       name: wheel
-  #       state: present
+    - name: Make sure we have a 'wheel' group
+      group:
+        name: wheel
+        state: present
 
-  #   - name: Allow 'wheel' group to have passwordless sudo
-  #     lineinfile:
-  #       path: /etc/sudoers
-  #       state: present
-  #       regexp: '^%wheel'
-  #       line: '%wheel ALL=(ALL) NOPASSWD: ALL'
-  #       validate: '/usr/sbin/visudo -cf %s'
+    - name: Allow 'wheel' group to have passwordless sudo
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: '/usr/sbin/visudo -cf %s'
 
-  # # User + Key Setup
-  #   - name: Create a new regular user with sudo privileges
-  #     user:
-  #       name: "{{ create_user }}"
-  #       state: present
-  #       groups: wheel
-  #       append: true
-  #       create_home: true
-  #       shell: /bin/bash
+  # User + Key Setup
+    - name: Create a new regular user with sudo privileges
+      user:
+        name: "{{ create_user }}"
+        state: present
+        groups: wheel
+        append: true
+        create_home: true
+        shell: /bin/bash
 
-  #   - name: Set authorized key for remote user
-  #     authorized_key:
-  #       user: "{{ create_user }}"
-  #       state: present
-  #       key: "{{ copy_local_key }}"
+    - name: Set authorized key for remote user
+      authorized_key:
+        user: "{{ create_user }}"
+        state: present
+        key: "{{ copy_local_key }}"
 
-  #   - name: Disable password authentication for root
-  #     lineinfile:
-  #       path: /etc/ssh/sshd_config
-  #       state: present
-  #       regexp: '^#?PermitRootLogin'
-  #       line: 'PermitRootLogin prohibit-password'
+    - name: Disable password authentication for root
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        state: present
+        regexp: '^#?PermitRootLogin'
+        line: 'PermitRootLogin prohibit-password'
 
     - name: Update apt
       apt: update_cache=yes
@@ -94,6 +94,18 @@
 
     - name: Install python3 dev dependencies
       apt: name={{ python3_dev }} state=latest
+
+    - name: Configure Python 3
+      shell: |
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
+        update-alternatives --set python3 /usr/bin/python3.7
+
+    - name: Install Anki
+      shell:
+        cmd: sudo ln -s apt_pkg.cpython-{36m,37m}-x86_64-linux-gnu.so
+        chdir: /usr/lib/python3/dist-packages
+
 
     - name: Install Desktop
       apt: 
@@ -144,38 +156,36 @@
         dest: /usr/local/
         remote_src: yes
 
-    - name: Configure Python 3
-      shell: |
-        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
-        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
-        update-alternatives --set python3 /usr/bin/python3.7
+    # - name: Get Anki Source Code
+    #   git:
+    #     repo: 'https://github.com/ankitects/anki'
+    #     dest: /anki/latest
+    #     version: 2.1.26
 
-    - name: Get Anki Source Code
-      git:
-        repo: 'https://github.com/ankitects/anki'
-        dest: /anki/latest
-        version: 2.1.26
-
-    - name: Touch
+    - name: Touch build
       file:
         path: /anki/latest/build
         state: touch
 
-    - name: Make clean
-      make:
-        chdir: /anki/latest
-        target: clean
-
-    - name: Clean up pyenv
+    - name: Remove pyenv
       file:
         path: /anki/latest/pyenv
         state: absent
 
-      # TODO: Run `make check` as well
-    - name: Build Anki from source
+    - name: make clean
+      make:
+        chdir: /anki/latest
+        target: clean
+
+    - name: make build
       make:
         chdir: /anki/latest
         target: build
+
+    - name: make develop
+      make:
+        chdir: /anki/latest
+        target: develop
 
     - name: Build Anki from source
       make:
@@ -186,3 +196,8 @@
       become: yes
       become_user: vagrant
       shell: . /anki/latest/run
+
+    - name: make check
+      make:
+        chdir: /anki/latest
+        target: check
