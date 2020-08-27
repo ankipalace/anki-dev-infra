@@ -1,5 +1,5 @@
 #################################################
-# DO Community Playbooks: Initial Server Setup
+# Based on DO Community Playbooks: Initial Server Setup
 #################################################
 
 # TODO: Make sure to get node version 12
@@ -80,12 +80,6 @@
       ufw:
         rule: allow
         name: OpenSSH
-
-  #   - name: UFW - Deny all other incoming traffic by default
-  #     ufw:
-  #       state: enabled
-  #       policy: deny
-  #       direction: incoming
 
 ###################################################
 # Begin Modifications to Digital Ocean's template #
