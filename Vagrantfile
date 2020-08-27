@@ -5,20 +5,14 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/bionic64"
   config.disksize.size = "20GB"
   config.vm.synced_folder "../latest", "/anki/latest"
-  config.vm.synced_folder "../add-ons/butler", "/anki/add-ons/butler"
+  config.vm.synced_folder "../add-ons", "/anki/add-ons"
   config.vm.synced_folder "../pytest-anki", "/anki/pytest-anki"
-  # config.vm.synced_folder "../add-ons/tutorial-add-on", "/home/vagrant/.local/share/Anki2/addons21/tutorial-add-on"
 
   config.vm.provider "virtualbox" do |vb|
     vb.gui = true
     vb.memory = 3036
     vb.customize ["modifyvm", :id, "--vram", "16"]
     vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
-    # vb.customize ["storageattach", :id,
-    #               "--storagectl", "IDE",
-    #               "--port", "0", "--device", "1",
-    #               "--type", "dvddrive",
-    #               "--medium", "emptydrive"]
   end
 
   config.vm.provision "ansible" do |ansible|
