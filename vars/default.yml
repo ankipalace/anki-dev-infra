@@ -20,8 +20,6 @@ anki_dependencies:
   - python3-pyqt5.qtwebengine
   - python3-pyqt5.qtwebkit
   - pyqt5-dev-tools
-  - aab
-  - pytest-anki
 python3_dev:
   - python3.7
   - python3.7-dev
