@@ -1,6 +1,8 @@
 #################################################
 # DO Community Playbooks: Initial Server Setup
 #################################################
+
+# TODO: Make sure to get node version 12
 ---
 - hosts: all
   become: yes
@@ -14,7 +16,8 @@
       SHELLFLAGS: -x
       LC_ALL: "en_US.UTF-8"
       LC_CTYPE: "en_US.UTF-8"
-      # This stuff may not be necessary.  it seems installing the *correct venv version* works:  sudo apt-get install python3.6-venv
+      # This stuff may not be necessary.
+      # It seems installing the *correct venv version* works: sudo apt-get install python3.6-venv
       # See https://stackoverflow.com/questions/39539110/pyvenv-not-working-because-ensurepip-is-not-available
 
   tasks:
@@ -137,18 +140,10 @@
     #     remote_src: yes
     #     creates: /root/anki-2.1.26-linux-amd64
 
-    # - name: Install Anki
+    # - name: Install packaged Anki
     #   shell:
     #     cmd: make install
     #     chdir: /root/anki-2.1.26-linux-amd64
-
-    # - name: Get ripgrep
-    #   get_url:
-    #     url: https://github.com/BurntSushi/ripgrep/releases/download/11.0.2/ripgrep_11.0.2_amd64.deb
-    #     dest: /root/ripgrep_11.0.2_amd64.deb
-
-    # - name: Install ripgrep
-    #   apt: deb="/root/ripgrep_11.0.2_amd64.deb"
 
     - name: Install protoc
       unarchive:
@@ -156,11 +151,11 @@
         dest: /usr/local/
         remote_src: yes
 
-    # - name: Get Anki Source Code
-    #   git:
-    #     repo: 'https://github.com/ankitects/anki'
-    #     dest: /anki/latest
-    #     version: 2.1.26
+    - name: Get Anki Source Code
+      git:
+        repo: 'https://github.com/ankitects/anki'
+        dest: /anki/release
+        version: 2.1.32
 
     - name: Touch build
       file:
@@ -177,27 +172,23 @@
         chdir: /anki/latest
         target: clean
 
-    - name: make build
-      make:
-        chdir: /anki/latest
-        target: build
+    # - name: make build
+    #   make:
+    #     chdir: /anki/latest
+    #     target: build
 
-    - name: make develop
-      make:
-        chdir: /anki/latest
-        target: develop
+    # - name: Build Anki from source
+    #   make:
+    #     chdir: /anki/latest
+    #     target: develop
 
-    - name: Build Anki from source
-      make:
-        chdir: /anki/latest
-        target: develop
+    # - name: make check
+    #   make:
+    #     chdir: /anki/latest
+    #     target: check
 
     - name: Run Anki
       become: yes
       become_user: vagrant
       shell: . /anki/latest/run
 
-    - name: make check
-      make:
-        chdir: /anki/latest
-        target: check
