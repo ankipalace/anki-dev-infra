@@ -85,23 +85,31 @@
 # Begin Modifications to Digital Ocean's template #
 ###################################################
 
-# TODO: Sync up the order of these things with GH checks
+    - name: Install python3 dev dependencies
+      apt: name={{ python3_dev }} state=latest
+
     - name: Install Anki dependencies
       apt: name={{ anki_dependencies }} state=latest
 
-    - name: Install python3 dev dependencies
-      apt: name={{ python3_dev }} state=latest
+    - name: Symlink magic to wire up new Python 3
+      # ref: https://stackoverflow.com/questions/13708180/python-dev-installation-error-importerror-no-module-named-apt-pkg/36232975#36232975
+      become: yes
+      file:
+        src: /usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so
+        dest: /usr/lib/python3/dist-packages/apt_pkg.cpython-37m-x86_64-linux-gnu.so
+        state: link
+
+    - name: Pip 3
+      # ref: https://stackoverflow.com/questions/13708180/python-dev-installation-error-importerror-no-module-named-apt-pkg/36232975#comment96614225_36232975
+      apt:
+        name: python3-pip
+        state: latest
 
     - name: Configure Python 3
       shell: |
         update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
         update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
         update-alternatives --set python3 /usr/bin/python3.7
-
-    - name: Install Anki
-      shell:
-        cmd: sudo ln -s apt_pkg.cpython-{36m,37m}-x86_64-linux-gnu.so
-        chdir: /usr/lib/python3/dist-packages
 
 
     - name: Install Desktop
