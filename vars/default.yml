@@ -1,4 +1,5 @@
 create_user: anki
+anki_version: 2.1.32
 copy_local_key: '{{ lookup(''file'', lookup(''env'',''HOME'') + ''/.ssh/id_rsa.pub'') }}'
 sys_packages:
   - curl
@@ -6,11 +7,11 @@ sys_packages:
   - git
   - ufw
   - unzip
+  - tree
 anki_dependencies:
   - portaudio19-dev
   - mpv
   - lame
-  - npm
   - rsync
   - gcc
   - gettext
@@ -24,8 +25,5 @@ python3_dev:
   - python3.7
   - python3.7-dev
   - python3.7-venv
-  - python3-pip
   - python3.7-distutils
   - python3-apt
-  - devtools
-  - pdbpp
