@@ -111,11 +111,22 @@
         update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
         update-alternatives --set python3 /usr/bin/python3.7
 
+    - name: Install nvm
+      become: yes
+      become_user: vagrant
+      shell: >
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+      args:
+        creates: "{{ ansible_env.HOME }}/.nvm/nvm.sh"
 
     - name: Install Desktop
       apt: 
         name: lubuntu-desktop
         install-recommends: no
+    - name: Install node
+      become: yes
+      become_user: vagrant
+      shell: nvm install 12.18.3
 
     - name: Install Rust
       shell:
