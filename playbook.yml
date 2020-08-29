@@ -196,10 +196,10 @@
     #     chdir: /anki/anki
     #     target: check
 
-    - name: Run Anki
+    - name: Install goodies into Anki's virtual environment
       become: yes
       become_user: vagrant
-      shell: . /anki/latest/run
+      shell: /anki/anki/pyenv/bin/pip install aab pytest-anki hunter devtools pdbpp
 
     - name: Run Anki
       become: yes
