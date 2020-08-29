@@ -75,6 +75,11 @@
     - name: Install required system packages
       apt: name={{ sys_packages }} state=latest
 
+    - name: Install Desktop
+      apt:
+        name: lubuntu-desktop
+        install-recommends: no
+
   # UFW Setup
     - name: UFW - Allow SSH connections
       ufw:
@@ -119,10 +124,6 @@
       args:
         creates: "{{ ansible_env.HOME }}/.nvm/nvm.sh"
 
-    - name: Install Desktop
-      apt: 
-        name: lubuntu-desktop
-        install-recommends: no
     - name: Install node
       become: yes
       become_user: vagrant
