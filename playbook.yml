@@ -11,7 +11,7 @@
 
   # Pytest-anki requirement
   environment:
-      PYTHONPATH: "${PYTHONPATH}:${HOME}/anki/latest"
+      PYTHONPATH: "${PYTHONPATH}:${HOME}/anki/anki"
       ANKIDEV: 1
       SHELLFLAGS: -x
       LC_ALL: "en_US.UTF-8"
@@ -145,40 +145,36 @@
         dest: /usr/local/
         remote_src: yes
 
-    - name: Get Anki Source Code
-      git:
-        repo: 'https://github.com/ankitects/anki'
-        dest: /anki/release
-        version: 2.1.32
-
-    - name: Touch build
-      file:
-        path: /anki/latest/build
-        state: touch
+    # - name: Get Anki Source Code
+    #   git:
+    #     repo: 'https://github.com/ankitects/anki'
+    #     dest: /anki/{{ anki_version }}
+    #     version: {{ anki_version }}
 
     - name: Remove pyenv
       file:
-        path: /anki/latest/pyenv
+        path: /anki/anki/pyenv
         state: absent
 
-    - name: make clean
+    - name: Anki make clean
       make:
-        chdir: /anki/latest
+        chdir: /anki/anki
         target: clean
 
-    # - name: make build
-    #   make:
-    #     chdir: /anki/latest
-    #     target: build
+        # No idea why this was necessary
+    - name: Touch build
+      file:
+        path: /anki/anki/build
+        state: touch
 
-    # - name: Build Anki from source
-    #   make:
-    #     chdir: /anki/latest
-    #     target: develop
+    - name: Anki make build
+      make:
+        chdir: /anki/anki
+        target: build
 
     # - name: make check
     #   make:
-    #     chdir: /anki/latest
+    #     chdir: /anki/anki
     #     target: check
 
     - name: Run Anki
@@ -186,3 +182,7 @@
       become_user: vagrant
       shell: . /anki/latest/run
 
+    - name: Run Anki
+      become: yes
+      become_user: vagrant
+      shell: . /anki/anki/run

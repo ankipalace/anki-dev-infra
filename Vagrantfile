@@ -4,8 +4,8 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/bionic64"
   config.disksize.size = "20GB"
-  config.vm.synced_folder "../anki", "/anki/latest"
-  # config.vm.synced_folder "../add-ons", "/anki/add-ons"
+  config.vm.synced_folder "../anki", "/anki/anki"
+  config.vm.synced_folder "../add-ons", "/anki/add-ons"
   # config.vm.synced_folder "../pytest-anki", "/anki/pytest-anki"
 
   config.vm.provider "virtualbox" do |vb|
