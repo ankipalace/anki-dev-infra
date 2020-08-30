@@ -90,6 +90,7 @@
 # Begin Modifications to Digital Ocean's template #
 ###################################################
 
+# TODO: Re-order to match up with Anki's GitHub workflow
     - name: Install python3 dev dependencies
       apt: name={{ python3_dev }} state=latest
 
