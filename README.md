@@ -1,6 +1,9 @@
 ## Purpose ##
 
-Provide a reproducible, Ubuntu desktop environment for Anki development.
+Provide reproducible environments for Anki development.
+
+> Currently provides only a virtual machine but will be extended to produce a 
+> Dockerfile as well.
 
 This is an, as of yet, not incredibly well thought out Vagrantfile and Ansible 
 playbook that provisions an Ubuntu VirtualBox with a lightweight Lubuntu desktop.
@@ -33,3 +36,4 @@ to synchronize local folders into the VM.
 - Install other goodies into Anki's virtual environment
 - include some test add-ons
 - Install PyCharm?
+- Replicate to produce a Dockerfile

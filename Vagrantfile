@@ -20,6 +20,7 @@ Vagrant.configure("2") do |config|
     ansible.playbook = "playbook.yml"
     # ansible.verbose = "vvvv"
     ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }
+    # ansible.start_at_task = "Install node"
   end
 end
 
