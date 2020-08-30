@@ -182,13 +182,16 @@
         chdir: /anki/anki
         target: clean
 
-        # No idea why this was necessary
-    - name: Touch build
-      file:
-        path: /anki/anki/build
-        state: touch
+    - name: Anki make develop
+      become: yes
+      become_user: vagrant
+      make:
+        chdir: /anki/anki
+        target: develop
 
     - name: Anki make build
+      become: yes
+      become_user: vagrant
       make:
         chdir: /anki/anki
         target: build
