@@ -127,7 +127,7 @@
     - name: Install node
       become: yes
       become_user: vagrant
-      shell: nvm install 12.18.3
+      shell: . ~/.nvm/nvm.sh && nvm install 12.18.3
 
     - name: Install Rust
       shell:
